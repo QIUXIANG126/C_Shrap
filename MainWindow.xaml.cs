@@ -1,173 +1,105 @@
-﻿using System;
-using System.Linq;
+﻿
+using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
-namespace _2023_WpfApp1
+namespace WpfApp1
 {
     public partial class MainWindow : Window
     {
-        String shapeType = "Line";
-        Color strokeColor = Colors.Red;
-        Color fillColor = Colors.Yellow;
-        int strokeThickness = 1;
-
-        Point start, dest;
-
+        List<triangle> Triangle = new List<triangle>();
         public MainWindow()
         {
             InitializeComponent();
-            strokeColorPicker.SelectedColor = strokeColor;
-            fillColorPicker.SelectedColor = fillColor;
         }
-
-        private void ShapeButton_Click(object sender, RoutedEventArgs e)
+        private void button1_Click_1(object sender, RoutedEventArgs e)
         {
-            var targetRadioButton = sender as RadioButton;
-            shapeType = targetRadioButton.Tag.ToString();
-        }
-
-        private void strokeThicknessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            strokeThickness = Convert.ToInt32(strokeThicknessSlider.Value);
-        }
-
-        private void myCanvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            dest = e.GetPosition(myCanvas);
-            DisplayStatus();
-
-            if (e.LeftButton == MouseButtonState.Pressed)
+            double x, y, z;
+            bool s = (double.TryParse(textbox1.Text, out x) || double.TryParse(textbox2.Text, out y) || double.TryParse(textbox3.Text, out z));
+            if (s)
             {
-                Point origin = new Point
+                 x = double.Parse(textbox1.Text);
+                 y = double.Parse(textbox2.Text);
+                 z = double.Parse(textbox3.Text);
+                if(x > y && x > z)
                 {
-                    X = Math.Min(start.X, dest.X),
-                    Y = Math.Min(start.Y, dest.Y)
-                };
-                double w = Math.Abs(dest.X - start.X);
-                double h = Math.Abs(dest.Y - start.Y);
-
-                switch (shapeType)
+                    if (y + z > x)
+                    {
+                        label1.Background=new SolidColorBrush(Colors.Green);
+                        label1.Content = $"邊長{x},{y},{z} 可構成三角形";
+                        Triangle.Add(new triangle(x, y, z, true));
+                    }
+                    else
+                    {
+                        label1.Background = new SolidColorBrush(Colors.Red);
+                        label1.Content = $"邊長{x},{y},{z} 不可構成三角形";
+                        Triangle.Add(new triangle(x, y, z, false));
+                    }
+                }else if (y > x && y > z)
                 {
-                    case "Line":
-                        var line = myCanvas.Children.OfType<Line>().LastOrDefault();
-                        line.X2 = dest.X;
-                        line.Y2 = dest.Y;
-                        break;
-                    case "Rectangle":
-                        var rect = myCanvas.Children.OfType<Rectangle>().LastOrDefault();
-                        rect.Width = w;
-                        rect.Height = h;
-                        rect.SetValue(Canvas.LeftProperty, origin.X);
-                        rect.SetValue(Canvas.TopProperty, origin.Y);
-                        break;
-                    case "Ellipse":
-                        var ellipse = myCanvas.Children.OfType<Ellipse>().LastOrDefault();
-                        ellipse.Width = w;
-                        ellipse.Height = h;
-                        ellipse.SetValue(Canvas.LeftProperty, origin.X);
-                        ellipse.SetValue(Canvas.TopProperty, origin.Y);
-                        break;
+                    if (x + z > y)
+                    {
+                        label1.Background = new SolidColorBrush(Colors.Green);
+                        label1.Content = $"邊長{x},{y},{z} 可構成三角形";
+                        Triangle.Add(new triangle(x, y, z, true));
+                    }
+                    else
+                    {
+                        label1.Background = new SolidColorBrush(Colors.Red);
+                        label1.Content = $"邊長{x},{y},{z} 不可構成三角形";
+                        Triangle.Add(new triangle(x, y, z, false));
+                    }
+                }else if(z >x && z > y)
+                {
+                    if (y + x > z)
+                    {
+                        label1.Background = new SolidColorBrush(Colors.Green);
+                        label1.Content = $"邊長{x},{y},{z} 可構成三角形";
+                        Triangle.Add(new triangle(x, y, z, true));
+                    }
+                    else
+                    {
+                        label1.Background = new SolidColorBrush(Colors.Red);
+                        label1.Content = $"邊長{x},{y},{z} 不可構成三角形";
+                        Triangle.Add(new triangle(x, y, z, false));
+                    }
                 }
             }
-        }
-
-        private void myCanvas_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            start = e.GetPosition(myCanvas);
-            myCanvas.Cursor = Cursors.Cross;
-
-            switch (shapeType)
+            else
             {
-                case "Line":
-                    var line = new Line
-                    {
-                        Stroke = Brushes.Gray,
-                        StrokeThickness = 1,
-                        X1 = start.X,
-                        Y1 = start.Y,
-                        X2 = dest.X,
-                        Y2 = dest.Y
-                    };
-                    myCanvas.Children.Add(line);
-                    break;
-                case "Rectangle":
-                    var rect = new Rectangle
-                    {
-                        Stroke = Brushes.Gray,
-                        StrokeThickness = 1,
-                        Fill = Brushes.LightGray,
-                    };
-                    myCanvas.Children.Add(rect);
-                    rect.SetValue(Canvas.LeftProperty, start.X);
-                    rect.SetValue(Canvas.TopProperty, start.Y);
-                    break;
-                case "Ellipse":
-                    var ellipse = new Ellipse
-                    {
-                        Stroke = Brushes.Gray,
-                        StrokeThickness = 1,
-                        Fill = Brushes.LightGray,
-                    };
-                    myCanvas.Children.Add(ellipse);
-                    ellipse.SetValue(Canvas.LeftProperty, start.X);
-                    ellipse.SetValue(Canvas.TopProperty, start.Y);
-                    break;
+                label1.Content = null;
+                MessageBox.Show("輸入錯誤，請使用者重新輸入");
             }
-            DisplayStatus();
-        }
 
-        private void DisplayStatus()
-        {
-            int lineCount = myCanvas.Children.OfType<Line>().Count();
-            int rectCount = myCanvas.Children.OfType<Rectangle>().Count();
-            int ellipseCount = myCanvas.Children.OfType<Ellipse>().Count();
-            coordinateLabel.Content = $"座標點: ({Math.Round(start.X)}, {Math.Round(start.Y)}) : ({Math.Round(dest.X)}, {Math.Round(dest.Y)})";
-            shapeLabel.Content = $"Line: {lineCount}, Rectangle: {rectCount}, Ellipse: {ellipseCount}";
+            textblock_out(Triangle);
+            textbox1.Text = null;
+            textbox2.Text = null;
+            textbox3.Text = null;
         }
-
-        private void strokeColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        
+        public class triangle
         {
-            strokeColor = (Color)strokeColorPicker.SelectedColor;
+            private
+                double x, y, z;
+                bool s;
+            public
+                triangle(double X, double Y, double Z, bool S)
+                {
+                    x = X;
+                    y = Y;
+                    z = Z;
+                    s = S;
+
+                }
+            public string OUT(){ return $"{x},{y},{z} 能構成三角形: {s}";}
         }
-
-        private void fillColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        private void textblock_out(List<triangle> Triangles)
         {
-            fillColor = (Color)fillColorPicker.SelectedColor;
-        }
-
-        private void clearMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            myCanvas.Children.Clear();
-            DisplayStatus();
-        }
-
-        private void myCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            switch (shapeType)
+            textblock1.Text = "";
+            foreach(triangle triangle in Triangles)
             {
-                case "Line":
-                    var line = myCanvas.Children.OfType<Line>().LastOrDefault();
-                    line.Stroke = new SolidColorBrush(strokeColor);
-                    line.StrokeThickness = strokeThickness;
-                    break;
-                case "Rectangle":
-                    var rect = myCanvas.Children.OfType<Rectangle>().LastOrDefault();
-                    rect.Stroke = new SolidColorBrush(strokeColor);
-                    rect.Fill = new SolidColorBrush(fillColor);
-                    rect.StrokeThickness = strokeThickness;
-                    break;
-                case "Ellipse":
-                    var ellipse = myCanvas.Children.OfType<Ellipse>().LastOrDefault();
-                    ellipse.Stroke = new SolidColorBrush(strokeColor);
-                    ellipse.Fill = new SolidColorBrush(fillColor);
-                    ellipse.StrokeThickness = strokeThickness;
-                    break;
+                textblock1.Text += $"{triangle.OUT()}\n";
             }
-            myCanvas.Cursor = Cursors.Arrow;
         }
     }
 }
